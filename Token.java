@@ -33,4 +33,8 @@ public class Token {
     public String toString(){
         return tipo + " " + lexema + " ";
     }
+
+    public String imprimir(){
+        return "<\033[93m" + tipo + "\033[0m " + lexema + ">";
+    }
 }
