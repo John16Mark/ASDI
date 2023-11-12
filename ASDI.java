@@ -9,15 +9,6 @@ public class ASDI implements Parser{
     private boolean hayErrores = false;
     private Token preanalisis;
     private final List<Token> tokens;
-    
-    /*
-    private final Produccion Q = new Produccion(NoTerminal.Q, new ArrayList<Object>(Arrays.asList(
-        TipoToken.SELECT, NoTerminal.D, TipoToken.FROM, NoTerminal.T)));
-    private final Produccion D = new Produccion(NoTerminal.D, new ArrayList<Object>(Arrays.asList(
-        TipoToken.DISTINCT, NoTerminal.P)));
-    private final Produccion D_1 = new Produccion(NoTerminal.D, new ArrayList<Object>(Arrays.asList(
-        NoTerminal.P)));
-    */
 
     private final Stack<Object> pila = new Stack<>();
 
@@ -82,7 +73,7 @@ public class ASDI implements Parser{
         tabla.get(10).set(5, T3_2);
         tabla.get(10).set(6, T3_1);
         tabla.get(10).set(7, T3_2);
-
+        /*
         for(int k=0; k<11; k++){
             for(int j=0; j<8; j++){
                 if(tabla.get(k).get(j) !=null) {
@@ -94,6 +85,7 @@ public class ASDI implements Parser{
             }
             System.out.print("\n");
         }
+        */
     }
 
     @Override
@@ -102,9 +94,13 @@ public class ASDI implements Parser{
         pila.push(NoTerminal.Q);
 
         while(i<tokens.size()){
-            System.out.println("Comparando: "+pila.peek()+" - "+tokens.get(i).tipo);
+            //System.out.println("Comparando: "+pila.peek()+" - "+tokens.get(i).tipo);
             if(pila.peek() instanceof TipoToken && pila.peek() == tokens.get(i).tipo){
-                System.out.println("Iguales: "+pila.peek());
+                //System.out.println("Iguales: "+pila.peek());
+                if(pila.peek() == TipoToken.EOF && tokens.get(i).tipo == TipoToken.EOF){
+                    System.out.println("\033[94mAnálisis Sintáctico correcto\033[0m");
+                    return true;
+                }
                 i++;
                 pila.pop();
             }
@@ -119,11 +115,11 @@ public class ASDI implements Parser{
                     pila.pop();
                     ArrayList<Object> celda = (ArrayList<Object>) tabla.get(fila).get(columna);
                     for(int j = celda.size()-1; j>=0 ; j--){
-                        System.out.print(celda.get(j));
+                        //System.out.print(celda.get(j));
                         pila.push(celda.get(j));
                     }
+                    //System.out.print("\n");
                 }
-                    System.out.print("\n");
             } else {
                 System.out.println("\033[91mSe encontraron errores\033[0m");
                 return false;
@@ -131,181 +127,6 @@ public class ASDI implements Parser{
         }
 
         return true;
-        /*
-        Q();
-
-        if(preanalisis.tipo == TipoToken.EOF && !hayErrores){
-            System.out.println("Consulta correcta");
-            return  true;
-        }else {
-            System.out.println("\033[91mSe encontraron errores\033[0m");
-        }
-        return false;
-        */
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-    // Q -> select D from T
-    private void Q(){
-        match(TipoToken.SELECT);
-        D();
-        match(TipoToken.FROM);
-        T();
-    }
-
-    // D -> distinct P | P
-    private void D(){
-        if(hayErrores)
-            return;
-
-        if(preanalisis.tipo == TipoToken.DISTINCT){
-            match(TipoToken.DISTINCT);
-            P();
-        }
-        else if (preanalisis.tipo == TipoToken.ASTERISCO
-                || preanalisis.tipo == TipoToken.IDENTIFICADOR) {
-            P();
-        }
-        else{
-            hayErrores = true;
-            System.out.println("Se esperaba 'distinct' or '*' or 'identificador'");
-        }
-    }
-
-    // P -> * | A
-    private void P(){
-        if(hayErrores)
-            return;
-
-        if(preanalisis.tipo == TipoToken.ASTERISCO){
-            match(TipoToken.ASTERISCO);
-        }
-        else if(preanalisis.tipo == TipoToken.IDENTIFICADOR){
-            A();
-        }
-        else{
-            hayErrores = true;
-            System.out.println("Se esperaba '*' or 'identificador'");
-        }
-    }
-
-    // A -> A2 A1
-    private void A(){
-        if(hayErrores)
-            return;
-
-        A2();
-        A1();
-    }
-
-    // A2 -> id A3
-    private void A2(){
-        if(hayErrores)
-            return;
-
-        if(preanalisis.tipo == TipoToken.IDENTIFICADOR){
-            match(TipoToken.IDENTIFICADOR);
-            A3();
-        }
-        else{
-            hayErrores = true;
-            System.out.println("Se esperaba un 'identificador'");
-        }
-    }
-
-    // A1 -> ,A | Ɛ
-    private void A1(){
-        if(hayErrores)
-            return;
-
-        if(preanalisis.tipo == TipoToken.COMA){
-            match(TipoToken.COMA);
-            A();
-        }
-    }
-
-    // A3 -> . id | Ɛ
-    private void A3(){
-        if(hayErrores)
-            return;
-
-        if(preanalisis.tipo == TipoToken.PUNTO){
-            match(TipoToken.PUNTO);
-            match(TipoToken.IDENTIFICADOR);
-        }
-    }
-
-    // T -> T2 T1
-    private void T(){
-        if(hayErrores)
-            return;
-
-        if(preanalisis.tipo == TipoToken.IDENTIFICADOR){
-            T2();
-            T1();
-        }
-        else{
-            hayErrores = true;
-            System.out.println("Se esperaba un 'identificador'");
-        }
-    }
-
-    // T1 -> , T | Ɛ
-    private void T1(){
-        if(hayErrores)
-            return;
-
-        if(preanalisis.tipo == TipoToken.COMA){
-            match(TipoToken.COMA);
-            T();
-        }
-    }
-
-    // T2 -> id T3
-    private void T2(){
-        if(hayErrores)
-            return;
-
-        if(preanalisis.tipo == TipoToken.IDENTIFICADOR){
-            match(TipoToken.IDENTIFICADOR);
-            T3();
-        }
-        else{
-            hayErrores = true;
-            System.out.println("Se esperaba un 'identificador'");
-        }
-    }
-
-    // T3 -> id | Ɛ
-    private void T3(){
-        if(hayErrores)
-            return;
-
-        if(preanalisis.tipo == TipoToken.IDENTIFICADOR){
-            match(TipoToken.IDENTIFICADOR);
-        }
-    }
-
-    private void match(TipoToken tt){
-        if(preanalisis.tipo == tt){
-            i++;
-            preanalisis = tokens.get(i);
-        }
-        else{
-            hayErrores = true;
-            System.out.println("\033[91mError encontrado\033[0m");
-        }
-
     }
 
 }
