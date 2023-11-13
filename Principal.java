@@ -27,11 +27,11 @@ public class Principal {
     private static void ejecutar(String source){
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
-
+        /*
         for(Token token : tokens){
             System.out.println(token.imprimir());
-        }
-
+        }*/
+        
         Parser parser = new ASDI(tokens);
         parser.parse();
     }
